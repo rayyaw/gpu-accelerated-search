@@ -1,7 +1,10 @@
+#include <vector>
+
 #include "catch/catch.hpp"
 
 #include "models/listWithSize.h"
 
+using std::vector;
 using utils::ListWithSize;
 
 ListWithSize<int> makeList() {
@@ -16,6 +19,22 @@ ListWithSize<int> *makeListPtr() {
 
 TEST_CASE("Standard ListWithSize initialization and access", "[ListWithSize]") {
     ListWithSize<int> exampleList = makeList();
+
+    REQUIRE(exampleList.size() == 5);
+    REQUIRE(exampleList[0] == 4);
+    REQUIRE(exampleList[1] == 5);
+    REQUIRE(exampleList[2] == 6);
+    REQUIRE(exampleList[3] == 7);
+    REQUIRE(exampleList[4] == 8);
+}
+
+TEST_CASE("ListWithSize vector constructor", "[ListWithSize]") {
+    vector<int> vec = vector<int>();
+    for (int i = 4; i < 9; i++) {
+        vec.push_back(i);
+    }
+
+    ListWithSize<int> exampleList(vec);
 
     REQUIRE(exampleList.size() == 5);
     REQUIRE(exampleList[0] == 4);

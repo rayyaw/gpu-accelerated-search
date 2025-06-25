@@ -2,42 +2,27 @@
 
 #include <vector>
 
+#include "models/listWithSize.h"
+
 using std::vector;
+using utils::ListWithSize;
 
 namespace linalg {
-    template<typename T>
-    class MutableCsrMatrix<T> {
+    class CsrMatrix {
         public:
-        MutableCsrMatrix<T>(size_t rows, size_t cols);
-        static MutableCsrMatrix<T> fromDenseMatrix(const vector<vector<T>> &matrix);
-        CsrMatrix<T> toImmutable() const;
+        // Input is of the form matrix[row[col]]
+        // Values should be in seconds
+        CsrMatrix(const vector<vector<uint16_t>> &matrix);
 
         // Element access: matrix(row, col)
-        T &operator()(size_t row, size_t col);
+        uint16_t operator()(size_t row, size_t col) const;
 
         private:
-        size_t _rows;
-        size_t _cols;
+        size_t _rows = 0;
+        size_t _cols = 0;
 
-        vector<T> _values;
-        vector<T> _col_indices;
-        vector<T> _row_ptr;
-    }
-
-    template<typename T>
-    class CsrMatrix<T> {
-        public:
-        static CsrMatrix<T> fromDenseMatrix(const vector<vector<T>> &matrix);
-
-        // Element access: matrix(row, col)
-        T &operator()(size_t row, size_t col) const;
-
-        private:
-        size_t _rows;
-        size_t _cols;
-
-        ListWithSize<T> _values;
-        ListWithSize<T> _col_indices;
-        ListWithSize<T> _row_ptr;
-    }
+        ListWithSize<uint16_t> _values = ListWithSize<uint16_t>(0);
+        ListWithSize<size_t> _col_indices = ListWithSize<size_t>(0);
+        ListWithSize<size_t> _row_ptr = ListWithSize<size_t>(0);
+    };
 }

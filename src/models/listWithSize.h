@@ -1,5 +1,13 @@
 #pragma once
 
+#include <format>
+#include <stdexcept>
+#include <vector>
+
+using std::format;
+using std::out_of_range;
+using std::vector;
+
 namespace utils {
     template <typename T>
 
@@ -9,6 +17,7 @@ namespace utils {
         public:
         ListWithSize(size_t num_items);
         ListWithSize(size_t num_items, T* list_items);
+        ListWithSize(vector<T> items);
         ListWithSize(const ListWithSize &other);
         ListWithSize &operator=(const ListWithSize &other);
         ~ListWithSize();
@@ -18,6 +27,8 @@ namespace utils {
 
         private:
         size_t _num_items;
+
+        // Future optimization: Pass a constructor option that makes this live in pinned memory
         T* _items;
     };
 
@@ -33,6 +44,16 @@ namespace utils {
         _items = new T[_num_items];
 
         std::copy(list_items, list_items + _num_items, _items);
+    }
+
+    template<typename T>
+    ListWithSize<T>::ListWithSize(vector<T> items) {
+        _num_items = items.size();
+        _items = new T[_num_items];
+
+        T* data = items.data();
+
+        std::copy(data, data + _num_items, _items);
     }
 
     template<typename T>
@@ -63,7 +84,7 @@ namespace utils {
     template<typename T>
     T &ListWithSize<T>::operator[](size_t index) const {
         if (index >= _num_items) {
-            throw std::out_of_range(std::format("Attempt to access element {} in ListWithSize of size {}", index, _num_items));
+            throw out_of_range(format("Attempt to access element {} in ListWithSize of size {}", index, _num_items));
         }
 
         return _items[index];
