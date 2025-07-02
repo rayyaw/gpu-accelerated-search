@@ -102,7 +102,7 @@ namespace gpu {
      * @return cl_int An error code, or CL_SUCCESS if no error occurred
      */
     template <typename T>
-    cl_int copyDeviceToHost(cl_mem deviceMem, utils::ListWithSize<T> hostMem) {
+    cl_int deviceToHostCopy(cl_mem deviceMem, utils::ListWithSize<T> hostMem) {
         return clEnqueueReadBuffer(command_queues -> items[0], deviceMem, CL_TRUE, 0, hostMem.num_items * sizeof(T), hostMem.items, 0, NULL, NULL);
     }
 

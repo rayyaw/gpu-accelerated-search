@@ -3,6 +3,7 @@
 #include "csr.h"
 
 using linalg::CsrMatrix;
+using linalg::MutableCsrMatrix;
 using std::vector;
 using utils::ListWithSize;
 
@@ -35,6 +36,43 @@ CsrMatrix::CsrMatrix(const vector<vector<uint16_t>> &matrix) {
 }
 
 uint16_t CsrMatrix::operator()(const size_t row, const size_t col) const {
+    size_t row_start = _row_ptr[row];
+    size_t next_row_start = _row_ptr[row + 1];
+
+    for (size_t i = row_start; i < next_row_start; i++) {
+        size_t current_col = _col_indices[i];
+
+        if (current_col == col) {
+            return _values[i];
+        }
+    }
+
+    return (uint16_t) 0;
+}
+
+MutableCsrMatrix::MutableCsrMatrix(size_t rows, size_t cols) {
+    _rows = rows;
+    _cols = cols;
+
+    // This needs to be all 0 of size rows + 1
+    _row_ptr = vector<size_t>(rows + 1, 0);
+}
+
+void MutableCsrMatrix::addEntry(size_t row, size_t col, uint16_t entry) {
+    // Find the insertion position: at the end of the given row segment
+    size_t insert_pos = _row_ptr[row + 1];
+
+    // Insert the entry and column index at insert_pos
+    _values.insert(_values.begin() + insert_pos, entry);
+    _col_indices.insert(_col_indices.begin() + insert_pos, col);
+
+    // Update _row_ptr for all subsequent rows (shift by +1)
+    for (size_t r = row + 1; r < _row_ptr.size(); ++r) {
+        _row_ptr[r]++;
+    }
+}
+
+uint16_t MutableCsrMatrix::operator()(const size_t row, const size_t col) const {
     size_t row_start = _row_ptr[row];
     size_t next_row_start = _row_ptr[row + 1];
 

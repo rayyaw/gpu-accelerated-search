@@ -2,7 +2,7 @@
 
 #include "catch/catch.hpp"
 
-#include "models/listWithSize.h"
+#include "models/util/listWithSize.h"
 
 using std::vector;
 using utils::ListWithSize;

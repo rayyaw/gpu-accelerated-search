@@ -1,0 +1,3 @@
+- Fix the broken Dim2Tree test (probably incorrect implementation)
+- Add a function to convert MutableCsrMatrix to an immutable one and test it
+- Implement GeoGraph and load in data. make sure I have enough RAM

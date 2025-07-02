@@ -13,6 +13,9 @@ clean:
 csr:
 	${CC_ENHANCED} -o bin/csr.o -c src/models/linalg/csr.cpp -lOpenCL
 
+dim2Tree:
+	${CC_ENHANCED} -o bin/dim2Tree.o -c src/models/util/dim2Tree.cpp -lOpenCL
+
 gpu:
 	${CC_ENHANCED} -o bin/gpu.o -c src/gpu/gpu.cpp -lOpenCL
 
@@ -27,7 +30,6 @@ run: gpu io main csr
 	
 
 # Using Catch for unit tests
-# TODO: Support checking for memory leaks in tests
 catch: test/catch/catch-main.cpp
 	${CC_TEST} -o bin/catch.o -c test/catch/catch-main.cpp
 
@@ -37,5 +39,8 @@ test_models_listWithSize: catch
 test_models_csr: catch csr
 	${CC_TEST} -o bin/test_models_csr.o -c test/models/linalg/csr.cpp
 
-test: catch test_models_listWithSize test_models_csr
-	${CC_TEST} bin/test_models_listWithSize.o bin/test_models_csr.o bin/csr.o bin/catch.o -o bin/runTest.exe -mconsole
+test_models_dim2Tree: catch dim2Tree
+	${CC_TEST} -o bin/test_models_dim2Tree.o -c test/models/util/dim2Tree.cpp
+
+test: catch test_models_listWithSize test_models_csr test_models_dim2Tree
+	${CC_TEST} bin/test_models_listWithSize.o bin/test_models_csr.o bin/test_models_dim2Tree.o bin/dim2Tree.o bin/csr.o bin/catch.o -o bin/runTest.exe -mconsole
