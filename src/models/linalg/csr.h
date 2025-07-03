@@ -14,6 +14,7 @@ namespace linalg {
         // Values should be in seconds
         MutableCsrMatrix(size_t rows, size_t cols);
         void addEntry(size_t row, size_t col, uint16_t entry);
+        size_t getMemorySize() const;
 
         // Element access: matrix(row, col)
         uint16_t operator()(size_t row, size_t col) const;
@@ -44,6 +45,9 @@ namespace linalg {
 
         // Element access: matrix(row, col)
         uint16_t operator()(size_t row, size_t col) const;
+        
+        // Calculate and return the memory size of the CSR matrix in bytes
+        size_t getMemorySize() const;
 
         private:
         size_t _rows = 0;

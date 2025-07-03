@@ -3,7 +3,7 @@
 #include <string>
 
 #include "gpu.h"
-#include "../utils/listWithSize.h"
+#include "models/util/listWithSize.h"
 
 using std::string;
 
@@ -14,7 +14,6 @@ utils::ListWithSize<cl_command_queue> *command_queues;
 cl_context *context;
 map<const char*, cl_kernel> *available_kernels;
 
-#define FOR_ALL_DEVICES(stmt) for (size_t i = 0; i < devices -> num_items; i++) {stmt;}
 #define SET_ERROR_IF_NULL cl_int local_err; if (err == NULL) err = &local_err;
 #define RETURN_ON_ERROR if (CL_SUCCESS != err) return err;
 
@@ -47,38 +46,40 @@ cl_int gpu::initializeGpuData(size_t device_no) {
         return err;
     }
 
-    devices = new utils::ListWithSize<cl_device_id>();
-    devices -> items = devices_local;
-    devices -> num_items = numDevices;
+    devices = new utils::ListWithSize<cl_device_id>(numDevices, devices_local);
 
     // Device selector
-    if (device_no != -1 && device_no < devices -> num_items) {
-        devices -> items[0] = devices -> items[device_no];
-        devices -> num_items = 1;
+    if (device_no != -1 && device_no < devices->size()) {
+        (*devices)[0] = (*devices)[device_no];
+        // Note: Size remains unchanged as ListWithSize does not support resizing
     }
 
     delete platforms;
 
     context = new cl_context();
-    *context = clCreateContext(NULL, devices -> num_items, devices -> items, NULL, NULL, &err);
+    *context = clCreateContext(NULL, devices->size(), devices->data(), NULL, NULL, &err);
 
     if (CL_SUCCESS != err) {
-        FOR_ALL_DEVICES(clReleaseDevice(devices -> items[i]))
+        for (size_t i = 0; i < devices->size(); i++) {
+            clReleaseDevice((*devices)[i]);
+        }
 
         delete[] devices_local;
         return err;
     }
 
-    cl_command_queue *queues = new cl_command_queue[devices -> num_items];
-    for (size_t i = 0; i < devices -> num_items; i++) {
-        queues[i] = clCreateCommandQueueWithProperties(*context, devices -> items[i], NULL, &err);
+    cl_command_queue *queues = new cl_command_queue[devices->size()];
+    for (size_t i = 0; i < devices->size(); i++) {
+        queues[i] = clCreateCommandQueueWithProperties(*context, (*devices)[i], NULL, &err);
 
         if (CL_SUCCESS != err) {
             clReleaseContext(*context);
 
-            FOR_ALL_DEVICES(clReleaseDevice(devices -> items[i]))
+            for (size_t i = 0; i < devices->size(); i++) {
+                clReleaseDevice((*devices)[i]);
+            }
 
-            delete[] devices -> items;
+            // ListWithSize manages its own memory, no need to delete data directly
             delete[] queues;
 
             return err;
@@ -86,9 +87,7 @@ cl_int gpu::initializeGpuData(size_t device_no) {
 
     }
     
-    command_queues = new utils::ListWithSize<cl_command_queue>();
-    command_queues -> num_items = devices -> num_items;
-    command_queues -> items = queues;
+    command_queues = new utils::ListWithSize<cl_command_queue>(devices->size(), queues);
 
     available_kernels = new std::map<const char*, cl_kernel>();
 
@@ -103,14 +102,17 @@ void gpu::destroyGpuData() {
         clReleaseKernel(i -> second);
     }
 
-    FOR_ALL_DEVICES(clReleaseCommandQueue(command_queues -> items[i]));
+    for (size_t i = 0; i < command_queues->size(); i++) {
+        clReleaseCommandQueue((*command_queues)[i]);
+    }
 
     clReleaseContext(*context);
 
-    FOR_ALL_DEVICES(clReleaseDevice(devices -> items[i]));
+    for (size_t i = 0; i < devices->size(); i++) {
+        clReleaseDevice((*devices)[i]);
+    }
 
-    delete[] devices -> items;
-    delete[] command_queues -> items;
+    // ListWithSize manages its own memory, no need to delete data directly
 
     delete devices;
     delete command_queues;
@@ -157,7 +159,7 @@ cl_kernel gpu::compileKernel(const char *kernelCode, const char *kernelFunctionN
     cl_program program = clCreateProgramWithSource(*context, 1, &kernelCode, NULL, err);
     if (CL_SUCCESS != *err) return cl_kernel();
 
-    clBuildProgram(program, devices -> num_items, devices -> items, NULL, NULL, NULL);
+    clBuildProgram(program, devices->size(), devices->data(), NULL, NULL, NULL);
 
     cl_kernel kernel = clCreateKernel(program, kernelFunctionName, err);
 
@@ -186,15 +188,15 @@ cl_mem gpu::deviceOutputAllocate(size_t nbytes, cl_int *err) {
 cl_int gpu::launchKernel(cl_kernel kernel, utils::ListWithSize<size_t> gridDim, utils::ListWithSize<size_t> blockDim) {
     cl_int err;
 
-    FOR_ALL_DEVICES(
-        err = clEnqueueNDRangeKernel(command_queues -> items[i], kernel, gridDim.num_items, NULL, gridDim.items, blockDim.items, 0, NULL, NULL);
+    for (size_t i = 0; i < command_queues->size(); i++) {
+        err = clEnqueueNDRangeKernel((*command_queues)[i], kernel, gridDim.size(), NULL, gridDim.data(), blockDim.data(), 0, NULL, NULL);
         RETURN_ON_ERROR;
-    )
+    }
 
-    FOR_ALL_DEVICES(
-        err = clFinish(command_queues -> items[i]); 
+    for (size_t i = 0; i < command_queues->size(); i++) {
+        err = clFinish((*command_queues)[i]); 
         RETURN_ON_ERROR;
-    )
+    }
 
     return CL_SUCCESS;
 }

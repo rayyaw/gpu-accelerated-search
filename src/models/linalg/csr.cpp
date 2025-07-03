@@ -58,6 +58,13 @@ uint16_t CsrMatrix::operator()(const size_t row, const size_t col) const {
     return (uint16_t) 0;
 }
 
+size_t CsrMatrix::getMemorySize() const {
+    size_t values_size = _values.size() * sizeof(uint16_t);
+    size_t col_indices_size = _col_indices.size() * sizeof(size_t);
+    size_t row_ptr_size = _row_ptr.size() * sizeof(size_t);
+    return values_size + col_indices_size + row_ptr_size;
+}
+
 MutableCsrMatrix::MutableCsrMatrix(size_t rows, size_t cols) {
     _rows = rows;
     _cols = cols;
@@ -93,4 +100,11 @@ uint16_t MutableCsrMatrix::operator()(const size_t row, const size_t col) const 
     }
 
     return (uint16_t) 0;
+}
+
+size_t MutableCsrMatrix::getMemorySize() const {
+    size_t values_size = _values.size() * sizeof(uint16_t);
+    size_t col_indices_size = _col_indices.size() * sizeof(size_t);
+    size_t row_ptr_size = _row_ptr.size() * sizeof(size_t);
+    return values_size + col_indices_size + row_ptr_size;
 }

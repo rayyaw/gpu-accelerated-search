@@ -4,13 +4,12 @@
 #include <map>
 #include <string>
 
-#include "../utils/listWithSize.h"
+#include "models/util/listWithSize.h"
 
 using std::map;
 using std::string;
 
 #define MAX_DEVICES 16
-#define FOR_ALL_DEVICES(stmt) for (size_t i = 0; i < devices -> num_items; i++) {stmt;}
 #define SET_ERROR_IF_NULL cl_int local_err; if (err == NULL) err = &local_err;
 #define RETURN_ON_ERROR if (CL_SUCCESS != err) return err;
 
@@ -103,7 +102,7 @@ namespace gpu {
      */
     template <typename T>
     cl_int deviceToHostCopy(cl_mem deviceMem, utils::ListWithSize<T> hostMem) {
-        return clEnqueueReadBuffer(command_queues -> items[0], deviceMem, CL_TRUE, 0, hostMem.num_items * sizeof(T), hostMem.items, 0, NULL, NULL);
+return clEnqueueReadBuffer((*command_queues)[0], deviceMem, CL_TRUE, 0, hostMem.size() * sizeof(T), hostMem.data(), 0, NULL, NULL);
     }
 
     /**

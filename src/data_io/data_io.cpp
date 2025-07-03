@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iostream>
 #include <stdexcept>
 #include <unordered_map>
 #include <vector>
@@ -8,14 +9,16 @@
 
 using linalg::CsrMatrix;
 using linalg::MutableCsrMatrix;
+using nlohmann::detail::parse_error;
 using nlohmann::json;
+using std::cout;
+using std::endl;
 using std::ifstream;
 using std::runtime_error;
 using std::size_t;
 using std::string;
 using std::unordered_map;
 using std::vector;
-using json::parse_error;
 
 CsrMatrix data_io::loadSegmentsMatrix(const string &filename) {
     // Open the JSON file
@@ -41,6 +44,8 @@ CsrMatrix data_io::loadSegmentsMatrix(const string &filename) {
     // Map segment IDs to matrix indices
     std::unordered_map<std::string, size_t> segmentToIndex;
     size_t index = 0;
+    size_t totalSegments = data.size();
+    size_t progressCounter = 0;
     for (const auto& segment : data) {
         if (segment.contains("segment_id") && segment["segment_id"].is_string()) {
             std::string id = segment["segment_id"].get<std::string>();
@@ -48,6 +53,13 @@ CsrMatrix data_io::loadSegmentsMatrix(const string &filename) {
                 segmentToIndex[id] = index++;
             }
         }
+        progressCounter++;
+        if (progressCounter % 10000 == 0) {
+            cout << "Processed " << progressCounter << " of " << totalSegments << " segments for ID mapping." << endl;
+        }
+    }
+    if (progressCounter % 10000 != 0) {
+        cout << "Processed " << progressCounter << " of " << totalSegments << " segments for ID mapping." << endl;
     }
 
     size_t numSegments = segmentToIndex.size();
@@ -59,6 +71,8 @@ CsrMatrix data_io::loadSegmentsMatrix(const string &filename) {
     MutableCsrMatrix matrix(numSegments, numSegments);
 
     // Populate the matrix based on connected segments
+    size_t processedSegments = 0;
+    size_t totalSegmentsForMatrix = data.size();
     for (const auto& segment : data) {
         if (segment.contains("segment_id") && segment["segment_id"].is_string() &&
             segment.contains("connected_segments") && segment["connected_segments"].is_array()) {
@@ -80,6 +94,13 @@ CsrMatrix data_io::loadSegmentsMatrix(const string &filename) {
                 }
             }
         }
+        processedSegments++;
+        if (processedSegments % 10000 == 0) {
+            cout << "Processed " << processedSegments << " of " << totalSegmentsForMatrix << " segments for matrix population." << endl;
+        }
+    }
+    if (processedSegments % 10000 != 0) {
+        cout << "Processed " << processedSegments << " of " << totalSegmentsForMatrix << " segments for matrix population." << endl;
     }
 
     // Convert MutableCsrMatrix to CsrMatrix using the dedicated constructor

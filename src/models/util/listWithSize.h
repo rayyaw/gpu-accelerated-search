@@ -24,6 +24,7 @@ namespace utils {
 
         T &operator[](size_t index) const;
         size_t size() const;
+        T* data() const;
 
         private:
         size_t _num_items;
@@ -93,5 +94,10 @@ namespace utils {
     template<typename T>
     size_t ListWithSize<T>::size() const {
         return _num_items;
+    }
+
+    template<typename T>
+    T* ListWithSize<T>::data() const {
+        return _items;
     }
 }
