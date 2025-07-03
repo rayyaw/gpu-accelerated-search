@@ -35,6 +35,14 @@ CsrMatrix::CsrMatrix(const vector<vector<uint16_t>> &matrix) {
     _row_ptr = ListWithSize<size_t>(rowptr);
 }
 
+CsrMatrix::CsrMatrix(const MutableCsrMatrix &mutableMatrix) {
+    _rows = mutableMatrix._rows;
+    _cols = mutableMatrix._cols;
+    _values = ListWithSize<uint16_t>(mutableMatrix._values);
+    _col_indices = ListWithSize<size_t>(mutableMatrix._col_indices);
+    _row_ptr = ListWithSize<size_t>(mutableMatrix._row_ptr);
+}
+
 uint16_t CsrMatrix::operator()(const size_t row, const size_t col) const {
     size_t row_start = _row_ptr[row];
     size_t next_row_start = _row_ptr[row + 1];

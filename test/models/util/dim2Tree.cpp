@@ -82,7 +82,7 @@ TEST_CASE("Dim2Tree with many points", "[Dim2Tree]") {
             points.push_back({x, y});
         }
     }
-    
+
     Dim2Tree tree(points);
     
     // Test a few specific cases

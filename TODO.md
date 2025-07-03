@@ -1,3 +1,5 @@
 - Fix the broken Dim2Tree test (probably incorrect implementation)
+- Fix the Dim2Tree not being balanced
+- Create a helper function to compute the haversine formula and update distance calculation to use it
 - Add a function to convert MutableCsrMatrix to an immutable one and test it
 - Implement GeoGraph and load in data. make sure I have enough RAM

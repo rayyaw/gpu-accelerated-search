@@ -2,9 +2,10 @@ CC = clang++
 COMMON_FLAGS = -Wall -Wextra -std=c++20
 OPENCL_FLAGS = -I 'C:/Program Files (x86)/OCL_SDK_Light/include/' -L 'C:/Program Files (x86)/OCL_SDK_Light/lib/x86_64'
 SRC_FLAGS = -I src
+EXTERNAL_FLAGS = -I src/external
 TEST_FLAGS = -I test
 
-CC_ENHANCED = ${CC} ${COMMON_FLAGS} ${OPENCL_FLAGS} ${SRC_FLAGS}
+CC_ENHANCED = ${CC} ${COMMON_FLAGS} ${OPENCL_FLAGS} ${SRC_FLAGS} ${EXTERNAL_FLAGS}
 CC_TEST = ${CC_ENHANCED} ${TEST_FLAGS}
 
 clean:
@@ -22,11 +23,14 @@ gpu:
 io:
 	${CC_ENHANCED} -o bin/io.o -c src/io/io.cpp -lOpenCL
 
+data_io:
+	${CC_ENHANCED} -o bin/data_io.o -c src/data_io/data_io.cpp -lOpenCL
+
 main: gpu io
 	${CC_ENHANCED} -o bin/main.o -c src/main.cpp -lOpenCL
 
-run: gpu io main csr
-	${CC_ENHANCED} bin/main.o bin/io.o bin/gpu.o bin/csr.o -o bin/main.exe -lOpenCL -mconsole
+run: gpu io data_io main csr
+	${CC_ENHANCED} bin/main.o bin/io.o bin/gpu.o bin/data_io.o bin/csr.o -o bin/main.exe -lOpenCL -mconsole
 	
 
 # Using Catch for unit tests
