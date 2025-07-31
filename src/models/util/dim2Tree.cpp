@@ -1,5 +1,9 @@
+#include <iostream>
+
 #include "dim2Tree.h"
 
+using std::cout;
+using std::endl;
 using utils::Dim2Tree;
 using utils::ListWithSize;
 
@@ -25,6 +29,7 @@ size_t Dim2Tree::buildTree(vector<pair<float, float>>& points,
                           vector<size_t>& indices,
                           size_t start, size_t end, 
                           size_t depth, size_t nodeIndex) {
+
     if (start >= end) {
         return 0; // Empty subtree
     }
@@ -36,9 +41,9 @@ size_t Dim2Tree::buildTree(vector<pair<float, float>>& points,
     std::sort(indices.begin() + start, indices.begin() + end,
               [&points, axis](size_t a, size_t b) {
                   if (axis == 0) {
-                      return points[a].first < points[b].first; // Sort by latitude
+                      return points[a].second < points[b].second;
                   } else {
-                      return points[a].second < points[b].second; // Sort by longitude
+                      return points[a].first < points[b].first;
                   }
               });
     
@@ -79,6 +84,14 @@ size_t Dim2Tree::approximateNearestPoint(float latitude, float longitude) {
     searchNearest(0, latitude, longitude, bestIndex, bestDist);
     
     return bestIndex;
+}
+
+pair<float, float> Dim2Tree::operator[](size_t index) const {
+    if (index >= _points.size()) {
+        throw out_of_range(format("Attempt to access element {} in Dim2Tree of size {}", index, _points.size() / 2));
+    }
+
+    return pair<float, float>(_points[index * 2], _points[index * 2 + 1]);
 }
 
 size_t Dim2Tree::searchNearest(size_t nodeIndex, float lat, float lon, 

@@ -1,12 +1,15 @@
+#include <cmath>
+#include <iostream>
 #include <vector>
 #include <utility>
-#include <cmath>
 
 #include "catch/catch.hpp"
 #include "models/util/dim2Tree.h"
 
-using std::vector;
+using std::cout;
+using std::endl;
 using std::pair;
+using std::vector;
 using utils::Dim2Tree;
 
 // Helper function to create a test tree with a simple set of points
@@ -73,8 +76,29 @@ TEST_CASE("Dim2Tree with single point", "[Dim2Tree]") {
     REQUIRE(tree.approximateNearestPoint(1.0f, 1.0f) == 0);
 }
 
-// FIXME: this test is bricked
-TEST_CASE("Dim2Tree with many points", "[Dim2Tree]") {
+TEST_CASE("Dim2Tree with many points - power of 2", "[Dim2Tree]") {
+    // Create a larger set of points in a grid pattern
+    vector<pair<float, float>> points;
+    for (float x = 0.0f; x < 8.0f; x += 1.0f) {
+        for (float y = 0.0f; y < 8.0f; y += 1.0f) {
+            points.push_back({x, y});
+        }
+    }
+
+    Dim2Tree tree(points);
+    for (size_t i = 0; i < 64; i++) {
+        cout << "tree[" << i << "] = " << tree[i].first << "," << tree[i].second << endl;
+    }
+
+    size_t approximateNearestPoint = tree.approximateNearestPoint(1.1f, 2.2f);
+    pair<float, float> approximateLocation = tree[approximateNearestPoint];
+    
+    REQUIRE(approximateLocation.first == 2.0f);
+    REQUIRE(approximateLocation.second == 2.0f);
+}
+
+// TODO: dim2Tree breaks when the number of points is not a power of 2 (needs to split on the element 1 more or less than the median)
+TEST_CASE("Dim2Tree with many points - not a power of 2", "[Dim2Tree]") {
     // Create a larger set of points in a grid pattern
     vector<pair<float, float>> points;
     for (float x = 0.0f; x < 10.0f; x += 1.0f) {

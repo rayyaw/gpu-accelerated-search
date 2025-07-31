@@ -38,7 +38,7 @@ catch: test/catch/catch-main.cpp
 	${CC_TEST} -o bin/catch.o -c test/catch/catch-main.cpp
 
 test_models_listWithSize: catch
-	${CC_TEST} -o bin/test_models_listWithSize.o -c test/models/listWithSize.cpp
+	${CC_TEST} -o bin/test_models_listWithSize.o -c test/models/util/listWithSize.cpp
 
 test_models_csr: catch csr
 	${CC_TEST} -o bin/test_models_csr.o -c test/models/linalg/csr.cpp

@@ -24,6 +24,9 @@ namespace utils {
         // Returns the index of the nearest point in the original input vector
         size_t approximateNearestPoint(float latitude, float longitude);
 
+        
+        pair<float, float> operator[](size_t index) const;
+
     private:
         // Flat array representation of the KD-Tree
         // Format: [point0_lat, point0_lon, point1_lat, point1_lon, ...]
