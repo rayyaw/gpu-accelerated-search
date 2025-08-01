@@ -25,6 +25,18 @@ Dim2Tree createTestTree() {
     return Dim2Tree(points);
 }
 
+void validateApproximateNearestPoint(
+    Dim2Tree tree,
+    float inputLat, float inputLon,
+    float expectedLat, float expectedLon
+) {
+    size_t approximateNearestPoint = tree.approximateNearestPoint(inputLat, inputLon);
+    pair<float, float> approximateLocation = tree[approximateNearestPoint];
+    
+    REQUIRE(approximateLocation.first == expectedLat);
+    REQUIRE(approximateLocation.second == expectedLon);
+}
+
 TEST_CASE("Dim2Tree construction", "[Dim2Tree]") {
     // Test that the tree can be constructed without errors
     REQUIRE_NOTHROW(createTestTree());
@@ -33,36 +45,96 @@ TEST_CASE("Dim2Tree construction", "[Dim2Tree]") {
 TEST_CASE("Dim2Tree nearest point search - exact matches", "[Dim2Tree]") {
     Dim2Tree tree = createTestTree();
     
-    // Test exact matches for each point
-    REQUIRE(tree.approximateNearestPoint(2.0f, 3.0f) == 0);
-    REQUIRE(tree.approximateNearestPoint(5.0f, 4.0f) == 1);
-    REQUIRE(tree.approximateNearestPoint(9.0f, 6.0f) == 2);
-    REQUIRE(tree.approximateNearestPoint(4.0f, 7.0f) == 3);
-    REQUIRE(tree.approximateNearestPoint(8.0f, 1.0f) == 4);
-    REQUIRE(tree.approximateNearestPoint(7.0f, 2.0f) == 5);
+    validateApproximateNearestPoint(
+        tree,
+        2.0f, 3.0f, // input
+        2.0f, 3.0f // output
+    );
+
+    validateApproximateNearestPoint(
+        tree,
+        5.0f, 4.0f, // input
+        5.0f, 4.0f // output
+    );
+
+    validateApproximateNearestPoint(
+        tree,
+        9.0f, 6.0f, // input
+        9.0f, 6.0f // output
+    );
+
+    validateApproximateNearestPoint(
+        tree,
+        4.0f, 7.0f, // input
+        4.0f, 7.0f // output
+    );
+
+    validateApproximateNearestPoint(
+        tree,
+        8.0f, 1.0f, // input
+        8.0f, 1.0f // output
+    );
+
+    validateApproximateNearestPoint(
+        tree,
+        7.0f, 2.0f, // input
+        7.0f, 2.0f // output
+    );
 }
 
 TEST_CASE("Dim2Tree nearest point search - approximate matches", "[Dim2Tree]") {
     Dim2Tree tree = createTestTree();
-    
-    // Test points that are close to the input points
-    REQUIRE(tree.approximateNearestPoint(2.1f, 3.1f) == 0);
-    REQUIRE(tree.approximateNearestPoint(5.2f, 4.1f) == 1);
-    REQUIRE(tree.approximateNearestPoint(8.8f, 5.9f) == 2);
-    REQUIRE(tree.approximateNearestPoint(4.2f, 6.8f) == 3);
-    REQUIRE(tree.approximateNearestPoint(7.9f, 1.2f) == 4);
-    REQUIRE(tree.approximateNearestPoint(6.8f, 2.2f) == 5);
+    validateApproximateNearestPoint(
+        tree,
+        2.1f, 3.1f, // input
+        2.0f, 3.0f // output
+    );
+
+    validateApproximateNearestPoint(
+        tree,
+        5.2f, 4.1f, // input
+        5.0f, 4.0f // output
+    );
+
+    validateApproximateNearestPoint(
+        tree,
+        8.8f, 5.9f, // input
+        9.0f, 6.0f // output
+    );
+
+    validateApproximateNearestPoint(
+        tree,
+        4.2f, 6.8f, // input
+        4.0f, 7.0f // output
+    );
+
+    validateApproximateNearestPoint(
+        tree,
+        7.9f, 1.2f, // input
+        8.0f, 1.0f // output
+    );
+
+    validateApproximateNearestPoint(
+        tree,
+        6.8f, 2.2f, // input
+        7.0f, 2.0f // output
+    );
 }
 
 TEST_CASE("Dim2Tree nearest point search - distant points", "[Dim2Tree]") {
     Dim2Tree tree = createTestTree();
     
-    // Test points that are far from any input point
-    // For (0,0), the closest point should be (2,3) at index 0
-    REQUIRE(tree.approximateNearestPoint(0.0f, 0.0f) == 0);
-    
-    // For (10,10), the closest point should be (9,6) at index 2
-    REQUIRE(tree.approximateNearestPoint(10.0f, 10.0f) == 2);
+    validateApproximateNearestPoint(
+        tree,
+        0.0f, 0.0f, // input
+        2.0f, 3.0f // output
+    );
+
+    validateApproximateNearestPoint(
+        tree,
+        10.0f, 10.0f, // input
+        9.0f, 6.0f // output
+    );
 }
 
 TEST_CASE("Dim2Tree with single point", "[Dim2Tree]") {
@@ -71,9 +143,23 @@ TEST_CASE("Dim2Tree with single point", "[Dim2Tree]") {
     Dim2Tree tree(points);
     
     // Any query should return the only point
-    REQUIRE(tree.approximateNearestPoint(0.0f, 0.0f) == 0);
-    REQUIRE(tree.approximateNearestPoint(10.0f, 10.0f) == 0);
-    REQUIRE(tree.approximateNearestPoint(1.0f, 1.0f) == 0);
+    validateApproximateNearestPoint(
+        tree,
+        0.0f, 0.0f, // input
+        1.0f, 1.0f // output
+    );
+
+    validateApproximateNearestPoint(
+        tree,
+        10.0f, 10.0f, // input
+        1.0f, 1.0f // output
+    );
+
+    validateApproximateNearestPoint(
+        tree,
+        1.0f, 1.0f, // input
+        1.0f, 1.0f // output
+    );
 }
 
 TEST_CASE("Dim2Tree with many points - power of 2", "[Dim2Tree]") {
@@ -86,15 +172,12 @@ TEST_CASE("Dim2Tree with many points - power of 2", "[Dim2Tree]") {
     }
 
     Dim2Tree tree(points);
-    for (size_t i = 0; i < 64; i++) {
-        cout << "tree[" << i << "] = " << tree[i].first << "," << tree[i].second << endl;
-    }
 
-    size_t approximateNearestPoint = tree.approximateNearestPoint(1.1f, 2.2f);
-    pair<float, float> approximateLocation = tree[approximateNearestPoint];
-    
-    REQUIRE(approximateLocation.first == 2.0f);
-    REQUIRE(approximateLocation.second == 2.0f);
+    validateApproximateNearestPoint(
+        tree,
+        1.1f, 2.2f, // input
+        1.0f, 2.0f // output
+    );
 }
 
 // TODO: dim2Tree breaks when the number of points is not a power of 2 (needs to split on the element 1 more or less than the median)

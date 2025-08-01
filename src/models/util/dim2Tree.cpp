@@ -41,14 +41,14 @@ size_t Dim2Tree::buildTree(vector<pair<float, float>>& points,
     std::sort(indices.begin() + start, indices.begin() + end,
               [&points, axis](size_t a, size_t b) {
                   if (axis == 0) {
-                      return points[a].second < points[b].second;
-                  } else {
                       return points[a].first < points[b].first;
+                  } else {
+                      return points[a].second < points[b].second;
                   }
               });
     
     // Find median
-    size_t medianIdx = start + (end - start) / 2;
+    size_t medianIdx = (end + start) / 2;
     size_t originalIndex = indices[medianIdx];
     
     // Store the point and metadata
@@ -96,6 +96,7 @@ pair<float, float> Dim2Tree::operator[](size_t index) const {
 
 size_t Dim2Tree::searchNearest(size_t nodeIndex, float lat, float lon, 
                               size_t& bestIndex, float& bestDist) const {
+
     // If we've gone beyond the tree size, return
     if (nodeIndex >= _points.size() / 2) {
         return bestIndex;
@@ -111,7 +112,7 @@ size_t Dim2Tree::searchNearest(size_t nodeIndex, float lat, float lon,
     // Update best distance if this node is closer
     if (dist < bestDist) {
         bestDist = dist;
-        bestIndex = getOriginalIndex(nodeIndex);
+        bestIndex = nodeIndex;
     }
     
     // Get the splitting dimension for this node
@@ -121,27 +122,19 @@ size_t Dim2Tree::searchNearest(size_t nodeIndex, float lat, float lon,
     float targetValue = (splitDim == 0) ? lat : lon;
     float nodeValue = (splitDim == 0) ? nodeLat : nodeLon;
     
-    size_t firstChild, secondChild;
+    size_t childToSearch;
     if (targetValue < nodeValue) {
-        firstChild = leftChild(nodeIndex);
-        secondChild = rightChild(nodeIndex);
+        childToSearch = leftChild(nodeIndex);
     } else {
-        firstChild = rightChild(nodeIndex);
-        secondChild = leftChild(nodeIndex);
+        childToSearch = rightChild(nodeIndex);
     }
     
     // Search the first subtree
-    searchNearest(firstChild, lat, lon, bestIndex, bestDist);
+    searchNearest(childToSearch, lat, lon, bestIndex, bestDist);
     
     // Calculate the distance to the splitting plane
     float planeDist = targetValue - nodeValue;
     planeDist = planeDist * planeDist; // Square it
-    
-    // If the distance to the plane is less than the current best distance,
-    // we need to check the other subtree as well
-    if (planeDist < bestDist) {
-        searchNearest(secondChild, lat, lon, bestIndex, bestDist);
-    }
     
     return bestIndex;
 }
