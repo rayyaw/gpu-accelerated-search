@@ -2,7 +2,7 @@
 
 ## Step 1: Download map files from OpenStreetMap
 
-`python load/load-map.py`
+`python load/load-nodes.py`
 
 Dependencies: osmnx (install via pip)
 

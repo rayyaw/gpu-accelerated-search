@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "dim2Tree.h"
 
 using std::cout;
@@ -53,7 +51,7 @@ size_t Dim2Tree::buildTree(vector<pair<float, float>>& points,
     // Store the point and metadata
     _points[nodeIndex * 2] = points[originalIndex].first;      // Latitude
     _points[nodeIndex * 2 + 1] = points[originalIndex].second; // Longitude
-    _metadata[nodeIndex * 2] = originalIndex;                  // Original index
+    _metadata[originalIndex * 2] = nodeIndex;                  // Original index
     _metadata[nodeIndex * 2 + 1] = axis;                       // Split dimension
     
     // Recursively build subtrees
@@ -162,7 +160,7 @@ float Dim2Tree::distanceSquared(float lat1, float lon1, float lat2, float lon2) 
     return dLat * dLat + dLon * dLon;
 }
 
-size_t Dim2Tree::getOriginalIndex(size_t nodeIndex) const {
+size_t Dim2Tree::getNewIndex(size_t nodeIndex) const {
     return _metadata[nodeIndex * 2];
 }
 

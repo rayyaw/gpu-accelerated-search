@@ -16,16 +16,16 @@ namespace utils {
     class Dim2Tree {
     public:
         // Constructor that builds a KD-Tree from a vector of 2D points
-        // FIXME: assert float == 4
-        // TODO: Add computation of the haversine formula for A*
         Dim2Tree(vector<pair<float, float>> points);
 
         // Find the approximate nearest point to the given coordinates
         // Returns the index of the nearest point in the original input vector
         size_t approximateNearestPoint(float latitude, float longitude);
 
-        
         pair<float, float> operator[](size_t index) const;
+
+        // Get the new index of a point in the input vector
+        size_t getNewIndex(size_t nodeIndex) const;
 
     private:
         // Flat array representation of the KD-Tree
@@ -55,9 +55,6 @@ namespace utils {
         
         // Calculate squared Euclidean distance between two points
         float distanceSquared(float lat1, float lon1, float lat2, float lon2) const;
-        
-        // Get the original index of a point in the input vector
-        size_t getOriginalIndex(size_t nodeIndex) const;
         
         // Get the splitting dimension of a node (0 for latitude, 1 for longitude)
         int getSplitDimension(size_t nodeIndex) const;

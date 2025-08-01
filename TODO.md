@@ -1,5 +1,5 @@
 - Create a helper function to compute the haversine formula and update distance calculation to use it
-- Implement GeoGraph and load in data. make sure I have enough RAM
+- Implement GeoGraph and load in data. make sure I have enough RAM. Also implement a way to go back and forth with the OpenStreetMap node id
 
 Midway airport rough location: "lat": 41.7930767,
       "lng": -87.7412389

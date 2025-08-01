@@ -17,6 +17,9 @@ csr:
 dim2Tree:
 	${CC_ENHANCED} -o bin/dim2Tree.o -c src/models/util/dim2Tree.cpp -lOpenCL
 
+geoGraph:
+	${CC_ENHANCED} -o bin/geoGraph.o -c src/models/geo/geoGraph.cpp -lOpenCL
+
 gpu:
 	${CC_ENHANCED} -o bin/gpu.o -c src/gpu/gpu.cpp -lOpenCL
 
