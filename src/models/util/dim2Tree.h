@@ -45,6 +45,8 @@ namespace utils {
                          vector<size_t>& indices,
                          size_t start, size_t end, 
                          size_t depth, size_t nodeIndex);
+
+        size_t computeLeftSubtreeSize(size_t currentNodeIndex);
         
         // Helper method for nearest neighbor search
         // Returns the index of the nearest point in the original input vector

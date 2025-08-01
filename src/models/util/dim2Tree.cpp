@@ -46,9 +46,8 @@ size_t Dim2Tree::buildTree(vector<pair<float, float>>& points,
                       return points[a].second < points[b].second;
                   }
               });
-    
-    // Find median
-    size_t medianIdx = (end + start) / 2;
+
+    size_t medianIdx = start + computeLeftSubtreeSize(nodeIndex);
     size_t originalIndex = indices[medianIdx];
     
     // Store the point and metadata
@@ -73,6 +72,23 @@ size_t Dim2Tree::buildTree(vector<pair<float, float>>& points,
     
     // Return total number of nodes in this subtree (including this node)
     return 1 + leftNodes + rightNodes;
+}
+
+size_t Dim2Tree::computeLeftSubtreeSize(size_t currentNodeIndex) {
+    size_t totalNumPoints = _points.size() / 2;
+
+    // Find the height of the largest complete binary tree that fits
+    size_t totalCapacity = 0;
+    size_t layerCapacity = 1;
+
+    for (size_t i = currentNodeIndex * 2 + 1; i < totalNumPoints; i = i * 2 + 1) {
+        layerCapacity = std::min(layerCapacity, totalNumPoints - i);
+        totalCapacity += layerCapacity;
+
+        layerCapacity *= 2;
+    }
+
+    return totalCapacity;
 }
 
 size_t Dim2Tree::approximateNearestPoint(float latitude, float longitude) {

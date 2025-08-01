@@ -180,7 +180,6 @@ TEST_CASE("Dim2Tree with many points - power of 2", "[Dim2Tree]") {
     );
 }
 
-// TODO: dim2Tree breaks when the number of points is not a power of 2 (needs to split on the element 1 more or less than the median)
 TEST_CASE("Dim2Tree with many points - not a power of 2", "[Dim2Tree]") {
     // Create a larger set of points in a grid pattern
     vector<pair<float, float>> points;
@@ -192,12 +191,15 @@ TEST_CASE("Dim2Tree with many points - not a power of 2", "[Dim2Tree]") {
 
     Dim2Tree tree(points);
     
-    // Test a few specific cases
-    // For point (1.1, 2.2), the closest grid point should be (1.0, 2.0)
-    // which is at index 1*10 + 2 = 12
-    REQUIRE(tree.approximateNearestPoint(1.1f, 2.2f) == 21);
+    validateApproximateNearestPoint(
+        tree,
+        1.1f, 2.2f, // input
+        1.0f, 3.0f // output
+    );
     
-    // For point (5.6, 7.8), the closest grid point should be (6.0, 8.0)
-    // which is at index 6*10 + 8 = 68
-    REQUIRE(tree.approximateNearestPoint(5.6f, 7.8f) == 78);
+    validateApproximateNearestPoint(
+        tree,
+        5.6f, 7.8f, // input
+        5.0f, 8.0f // output
+    );
 }
