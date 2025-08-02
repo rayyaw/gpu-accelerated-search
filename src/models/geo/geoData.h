@@ -14,5 +14,5 @@ namespace geo {
 
         string nodeId;
         set<string> outboundAccessibleNodes;
-    }
+    };
 }

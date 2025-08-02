@@ -16,6 +16,7 @@ namespace utils {
     class Dim2Tree {
     public:
         // Constructor that builds a KD-Tree from a vector of 2D points
+        Dim2Tree() = default;
         Dim2Tree(vector<pair<float, float>> points);
 
         // Find the approximate nearest point to the given coordinates

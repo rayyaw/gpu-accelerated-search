@@ -38,6 +38,7 @@ namespace linalg {
         public:
         // Input is of the form matrix[row[col]]
         // Values should be in seconds
+        CsrMatrix() = default;
         CsrMatrix(const vector<vector<uint16_t>> &matrix);
         
         // Construct from a MutableCsrMatrix by copying its data

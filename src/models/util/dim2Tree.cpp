@@ -1,7 +1,5 @@
 #include "dim2Tree.h"
 
-using std::cout;
-using std::endl;
 using utils::Dim2Tree;
 using utils::ListWithSize;
 

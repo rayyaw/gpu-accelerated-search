@@ -1,6 +1,7 @@
 CC = clang++
 COMMON_FLAGS = -Wall -Wextra -std=c++20
-OPENCL_FLAGS = -I 'C:/Program Files (x86)/OCL_SDK_Light/include/' -L 'C:/Program Files (x86)/OCL_SDK_Light/lib/x86_64'
+OPENCL_FLAGS = -I 'C:/Program Files (x86)/OCL_SDK_Light/include/' 
+LINKER_FLAGS = -L 'C:/Program Files (x86)/OCL_SDK_Light/lib/x86_64' -mconsole
 SRC_FLAGS = -I src
 EXTERNAL_FLAGS = -I src/external
 TEST_FLAGS = -I test
@@ -8,35 +9,38 @@ TEST_FLAGS = -I test
 CC_ENHANCED = ${CC} ${COMMON_FLAGS} ${OPENCL_FLAGS} ${SRC_FLAGS} ${EXTERNAL_FLAGS}
 CC_TEST = ${CC_ENHANCED} ${TEST_FLAGS}
 
+# MARK: Compilation building blocks
 clean:
 	Remove-Item -Path "bin\*" -Recurse -Force
 
 csr:
-	${CC_ENHANCED} -o bin/csr.o -c src/models/linalg/csr.cpp -lOpenCL
+	${CC_ENHANCED} -o bin/csr.o -c src/models/linalg/csr.cpp
 
 dim2Tree:
-	${CC_ENHANCED} -o bin/dim2Tree.o -c src/models/util/dim2Tree.cpp -lOpenCL
+	${CC_ENHANCED} -o bin/dim2Tree.o -c src/models/util/dim2Tree.cpp
 
 geoGraph:
-	${CC_ENHANCED} -o bin/geoGraph.o -c src/models/geo/geoGraph.cpp -lOpenCL
+	${CC_ENHANCED} -o bin/geoGraph.o -c src/models/geo/geoGraph.cpp
 
 gpu:
 	${CC_ENHANCED} -o bin/gpu.o -c src/gpu/gpu.cpp -lOpenCL
 
 io:
-	${CC_ENHANCED} -o bin/io.o -c src/io/io.cpp -lOpenCL
+	${CC_ENHANCED} -o bin/io.o -c src/io/io.cpp
 
-data_io:
-	${CC_ENHANCED} -o bin/data_io.o -c src/data_io/data_io.cpp -lOpenCL
+# MARK: Scripts
+main_graphJsonToBinary:
+	${CC_ENHANCED} -o bin/main_graphJsonToBinary.o -c src/scripts/graphJsonToBinary.cpp
 
-main: gpu io
-	${CC_ENHANCED} -o bin/main.o -c src/main.cpp -lOpenCL
+# MARK: Executables
+graphJsonToBinary: csr dim2Tree geoGraph main_graphJsonToBinary
+	${CC_ENHANCED} bin/csr.o bin/dim2Tree.o bin/geoGraph.o bin/main_graphJsonToBinary.o -o bin/graphJsonToBinary.exe ${LINKER_FLAGS}
 
-run: gpu io data_io main csr
+run: gpu io main csr
 	${CC_ENHANCED} bin/main.o bin/io.o bin/gpu.o bin/data_io.o bin/csr.o -o bin/main.exe -lOpenCL -mconsole
 	
 
-# Using Catch for unit tests
+# MARK: Unit tests
 catch: test/catch/catch-main.cpp
 	${CC_TEST} -o bin/catch.o -c test/catch/catch-main.cpp
 
@@ -50,4 +54,4 @@ test_models_dim2Tree: catch dim2Tree
 	${CC_TEST} -o bin/test_models_dim2Tree.o -c test/models/util/dim2Tree.cpp
 
 test: catch test_models_listWithSize test_models_csr test_models_dim2Tree
-	${CC_TEST} bin/test_models_listWithSize.o bin/test_models_csr.o bin/test_models_dim2Tree.o bin/dim2Tree.o bin/csr.o bin/catch.o -o bin/runTest.exe -mconsole
+	${CC_TEST} bin/test_models_listWithSize.o bin/test_models_csr.o bin/test_models_dim2Tree.o bin/dim2Tree.o bin/csr.o bin/catch.o -o bin/runTest.exe ${LINKER_FLAGS}
