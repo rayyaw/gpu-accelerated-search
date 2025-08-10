@@ -2,3 +2,4 @@
 bin
 cache/
 data/*.json
+*.gpx

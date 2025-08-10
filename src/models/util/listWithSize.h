@@ -10,9 +10,18 @@ using std::vector;
 
 namespace utils {
     template <typename T>
+    // Same as ListWithSize, but memory is managed externally to the object.
+    // Do not attempt cleanup on a MemoryResult unless the generator explicitly declares that operation as safe.
+    struct MemoryResult {
+        size_t num_items;
+        T* items;
+    };
 
+    template <typename T>
     // Simple struct for returning a list's size along with the list itself
     // Managing the number of items is left to the user, and all functions implicitly assume it is correct
+    // This class manages the items for you, so no need to worry about pointer management.
+    // If created from a T*, that T* remains your responsibility to clean up.
     class ListWithSize {
         public:
         ListWithSize(size_t num_items);

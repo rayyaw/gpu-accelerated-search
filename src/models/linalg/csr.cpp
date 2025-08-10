@@ -4,8 +4,10 @@
 
 using linalg::CsrMatrix;
 using linalg::MutableCsrMatrix;
+using std::pair;
 using std::vector;
 using utils::ListWithSize;
+using utils::MemoryResult;
 
 CsrMatrix::CsrMatrix(const vector<vector<uint16_t>> &matrix) {
     _rows = matrix.size();
@@ -56,6 +58,19 @@ uint16_t CsrMatrix::operator()(const size_t row, const size_t col) const {
     }
 
     return (uint16_t) 0;
+}
+
+pair<MemoryResult<uint16_t>, MemoryResult<size_t>> CsrMatrix::valuesInRow(size_t row) const {
+    size_t row_start = _row_ptr[row];
+    size_t next_row_start = _row_ptr[row + 1];
+
+    uint16_t *row_start_ref_val = _values.data() + row_start;
+    size_t *row_start_ref_col = _col_indices.data() + row_start;
+
+    MemoryResult values = MemoryResult<uint16_t>(next_row_start - row_start, row_start_ref_val);
+    MemoryResult columns = MemoryResult<size_t>(next_row_start - row_start, row_start_ref_col);
+
+    return {values, columns};
 }
 
 size_t CsrMatrix::getMemorySize() const {

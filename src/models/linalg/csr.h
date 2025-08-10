@@ -1,11 +1,14 @@
 #pragma once
 
+#include <utility>
 #include <vector>
 
 #include "models/util/listWithSize.h"
 
+using std::pair;
 using std::vector;
 using utils::ListWithSize;
+using utils::MemoryResult;
 
 namespace linalg {
     class MutableCsrMatrix {
@@ -46,6 +49,11 @@ namespace linalg {
 
         // Element access: matrix(row, col)
         uint16_t operator()(size_t row, size_t col) const;
+
+        // Do not manually clean up the result of this call.
+        // Doing so will result in undefined behavior
+        // The first result is the column and the second is the index
+        pair<MemoryResult<uint16_t>, MemoryResult<size_t>> valuesInRow(size_t row) const;
         
         // Calculate and return the memory size of the CSR matrix in bytes
         size_t getMemorySize() const;

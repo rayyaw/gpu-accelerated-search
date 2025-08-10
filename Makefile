@@ -53,5 +53,8 @@ test_models_csr: catch csr
 test_models_dim2Tree: catch dim2Tree
 	${CC_TEST} -o bin/test_models_dim2Tree.o -c test/models/util/dim2Tree.cpp
 
-test: catch test_models_listWithSize test_models_csr test_models_dim2Tree
-	${CC_TEST} bin/test_models_listWithSize.o bin/test_models_csr.o bin/test_models_dim2Tree.o bin/dim2Tree.o bin/csr.o bin/catch.o -o bin/runTest.exe ${LINKER_FLAGS}
+test_models_geoGraph: geoGraph
+	${CC_TEST} -o bin/test_models_geoGraph.o -c test/models/geo/geoGraph.cpp
+
+test: catch test_models_listWithSize test_models_csr test_models_dim2Tree test_models_geoGraph
+	${CC_TEST} bin/test_models_geoGraph.o bin/geoGraph.o bin/test_models_listWithSize.o bin/test_models_csr.o bin/test_models_dim2Tree.o bin/dim2Tree.o bin/csr.o bin/catch.o -o bin/runTest.exe ${LINKER_FLAGS}

@@ -15,4 +15,14 @@ namespace geo {
         string nodeId;
         set<string> outboundAccessibleNodes;
     };
+
+    inline float distance(
+        const pair<float, float> &loc1,
+        const pair<float, float> &loc2
+    ) {
+        float latDiff = loc1.first - loc2.first;
+        float lonDiff = loc1.second - loc2.second;
+
+        return (latDiff + lonDiff) * 1000000.0f;
+    }
 }

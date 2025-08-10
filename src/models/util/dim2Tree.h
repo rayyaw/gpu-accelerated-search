@@ -20,7 +20,7 @@ namespace utils {
         Dim2Tree(vector<pair<float, float>> points);
 
         // Find the approximate nearest point to the given coordinates
-        // Returns the index of the nearest point in the original input vector
+        // Returns the index of the nearest point in the vector
         size_t approximateNearestPoint(float latitude, float longitude);
 
         pair<float, float> operator[](size_t index) const;
