@@ -80,7 +80,7 @@ optional<vector<GraphNode>> Graph::generateRoute(
                 path.push_back(GraphNode{
                     baseNode,
                     "TODO_nodeId", // TODO: set real node ID
-                    {"TODO_outbound"} // TODO: populate actual outbound accessible nodes
+                    {}
                 });
                 node = cameFrom[node];
             }
@@ -89,7 +89,7 @@ optional<vector<GraphNode>> Graph::generateRoute(
             path.push_back(GraphNode{
                 originNode,
                 "TODO_nodeId", // TODO: set real node ID
-                {"TODO_outbound"} // TODO: populate actual outbound accessible nodes
+                {}
             });
 
             reverse(path.begin(), path.end());
@@ -156,11 +156,13 @@ vector<GraphNode> Graph::parseGraphNodes(const json& j) {
             }
         }
 
-        // Parse neighbors
+        // Parse neighbors with transit time
         if (nodeJson.contains("neighbors") && nodeJson["neighbors"].is_array()) {
             for (const auto& neighbor : nodeJson["neighbors"]) {
-                if (neighbor.is_number()) {
-                    node.outboundAccessibleNodes.insert(to_string(neighbor.get<size_t>()));
+                if (neighbor.contains("node_id") && neighbor.contains("transit_time_sec")) {
+                    string neighborId = to_string(neighbor["node_id"].get<size_t>());
+                    float transitTimeSec = neighbor["transit_time_sec"].get<float>();
+                    node.outboundAccessibleNodesWithTime.emplace_back(neighborId, transitTimeSec);
                 }
             }
         }
@@ -187,10 +189,14 @@ void Graph::loadGraphFromNodes(vector<GraphNode> nodes) {
     MutableCsrMatrix edge_construction = MutableCsrMatrix(nodes.size(), nodes.size()); 
 
     for (size_t i = 0; i < nodes.size(); i++) {
-        for (string connectedVertex: nodes[i].outboundAccessibleNodes) {
+        for (const auto& [connectedVertexId, transitTimeSec] : nodes[i].outboundAccessibleNodesWithTime) {
             size_t departNodeId = _vertices.getNewIndex(i);
-            size_t arriveNodeId = _vertices.getNewIndex(nodeIdToIndex[connectedVertex]);
-            edge_construction.addEntry(departNodeId, arriveNodeId, 1); // TODO: Replace 1 with transit time in millis
+            size_t arriveNodeId = _vertices.getNewIndex(nodeIdToIndex[connectedVertexId]);
+
+            uint16_t transitTimeSeconds = static_cast<uint16_t>(transitTimeSec);
+            if (transitTimeSeconds <= 0) transitTimeSeconds = 1;  // avoid 0 cost
+
+            edge_construction.addEntry(departNodeId, arriveNodeId, transitTimeSeconds);
         }
     }
 

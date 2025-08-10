@@ -3,6 +3,8 @@ import json
 
 # Load graph for driving network in Chicago
 G = ox.graph_from_place("Chicago, Illinois, USA", network_type='drive')
+G = ox.add_edge_speeds(G)
+G = ox.add_edge_travel_times(G)
 print("Loaded graph.")
 
 # Build node data
@@ -13,14 +15,21 @@ for node_id, data in G.nodes(data=True):
     lng = data['x']
 
     # Get accessible (neighboring) node IDs from outgoing edges
-    neighbors = set()
-    for _, neighbor_id, _ in G.out_edges(node_id, keys=True):
-        neighbors.add(neighbor_id)
+    neighbors = []
+    for _, neighbor_id, edge_data in G.out_edges(node_id, data=True):
+        if node_id == neighbor_id:
+            continue  # Skip self-loops
+
+        travel_time = edge_data.get('travel_time', 1.0)  # Fallback to 1 sec if missing
+        neighbors.append({
+            "node_id": neighbor_id,
+            "transit_time_sec": round(travel_time, 2) if travel_time else 1.0
+        })
 
     node_data.append({
         "node_id": node_id,
         "location": {"lat": lat, "lng": lng},
-        "neighbors": list(neighbors)
+        "neighbors": neighbors
     })
 
 # Save to JSON
