@@ -1,12 +1,12 @@
 CC = clang++
 COMMON_FLAGS = -Wall -Wextra -std=c++20
-OPENCL_FLAGS = -I 'C:/Program Files (x86)/OCL_SDK_Light/include/' 
-LINKER_FLAGS = -L 'C:/Program Files (x86)/OCL_SDK_Light/lib/x86_64' -mconsole
+COMPILE_FLAGS = -I 'C:/Program Files (x86)/OCL_SDK_Light/include/' -I 'C:/Program Files/vcpkg/installed/x64-windows/include'
+LINKER_FLAGS = -L 'C:/Program Files (x86)/OCL_SDK_Light/lib/x86_64' -L 'C:/Program Files/vcpkg/installed/x64-windows/lib' -mconsole
 SRC_FLAGS = -I src
 EXTERNAL_FLAGS = -I src/external
 TEST_FLAGS = -I test
 
-CC_ENHANCED = ${CC} ${COMMON_FLAGS} ${OPENCL_FLAGS} ${SRC_FLAGS} ${EXTERNAL_FLAGS}
+CC_ENHANCED = ${CC} ${COMMON_FLAGS} ${COMPILE_FLAGS} ${SRC_FLAGS} ${EXTERNAL_FLAGS}
 CC_TEST = ${CC_ENHANCED} ${TEST_FLAGS}
 
 # MARK: Compilation building blocks
@@ -32,9 +32,15 @@ io:
 main_graphJsonToBinary:
 	${CC_ENHANCED} -o bin/main_graphJsonToBinary.o -c src/scripts/graphJsonToBinary.cpp
 
+main_generateRoute:
+	${CC_ENHANCED} -o bin/main_generateRoute.o -c src/scripts/generateRoute.cpp
+
 # MARK: Executables
 graphJsonToBinary: csr dim2Tree geoGraph main_graphJsonToBinary
 	${CC_ENHANCED} bin/csr.o bin/dim2Tree.o bin/geoGraph.o bin/main_graphJsonToBinary.o -o bin/graphJsonToBinary.exe ${LINKER_FLAGS}
+
+generateRoute: csr dim2Tree geoGraph main_generateRoute
+	${CC_ENHANCED} bin/csr.o bin/dim2Tree.o bin/geoGraph.o bin/main_generateRoute.o -o bin/generateRoute.exe ${LINKER_FLAGS}
 
 run: gpu io main csr
 	${CC_ENHANCED} bin/main.o bin/io.o bin/gpu.o bin/data_io.o bin/csr.o -o bin/main.exe -lOpenCL -mconsole

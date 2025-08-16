@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <optional>
 #include <string>
 #include <vector>
@@ -12,7 +13,9 @@
 using geo::GraphNode;
 using linalg::CsrMatrix;
 using nlohmann::json;
+using std::istream;
 using std::optional;
+using std::ostream;
 using std::string;
 using std::vector;
 using utils::Dim2Tree;
@@ -20,6 +23,7 @@ using utils::Dim2Tree;
 namespace geo {
     class Graph {
         public:
+        Graph() = default;
         Graph(const string &filename);
         Graph(vector<GraphNode> nodes);
 
@@ -27,6 +31,10 @@ namespace geo {
             pair<float, float> origin,
             pair<float, float> dest
         );
+        void dump(const string &filename);
+
+        friend istream &operator>>(istream &input, Graph &graph);
+        friend ostream &operator<<(ostream &output, const Graph &graph);
 
         // These fields should be treated as private outside of unit tests
         Dim2Tree _vertices;
@@ -38,4 +46,7 @@ namespace geo {
         json loadFileAsJson(const string &filename);
         vector<GraphNode> parseGraphNodes(const json &j);
     };
+
+    istream &operator>>(istream &input, Graph &graph);
+    ostream &operator<<(ostream &output, const Graph &graph);
 }

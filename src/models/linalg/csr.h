@@ -1,10 +1,13 @@
 #pragma once
 
+#include <iostream>
 #include <utility>
 #include <vector>
 
 #include "models/util/listWithSize.h"
 
+using std::istream;
+using std::ostream;
 using std::pair;
 using std::vector;
 using utils::ListWithSize;
@@ -49,6 +52,8 @@ namespace linalg {
 
         // Element access: matrix(row, col)
         uint16_t operator()(size_t row, size_t col) const;
+        friend istream &operator>>(istream &input, CsrMatrix &matrix);
+        friend ostream &operator<<(ostream &output, const CsrMatrix &matrix);
 
         // Do not manually clean up the result of this call.
         // Doing so will result in undefined behavior
@@ -68,4 +73,7 @@ namespace linalg {
         ListWithSize<size_t> _col_indices = ListWithSize<size_t>(0);
         ListWithSize<size_t> _row_ptr = ListWithSize<size_t>(0);
     };
+
+    istream &operator>>(istream &input, linalg::CsrMatrix &matrix);
+    ostream &operator<<(ostream &output, const linalg::CsrMatrix &matrix);
 }

@@ -1,5 +1,7 @@
 #include "dim2Tree.h"
 
+using std::istream;
+using std::ostream;
 using utils::Dim2Tree;
 using utils::ListWithSize;
 
@@ -8,8 +10,8 @@ Dim2Tree::Dim2Tree(vector<pair<float, float>> points) {
     // We need 2 floats per point (lat, lon)
     _points = ListWithSize<float>(points.size() * 2);
     
-    // We need 2 ints per node (original index, split dimension)
-    _metadata = ListWithSize<size_t>(points.size() * 2);
+    // We need 1 ints per node (original index)
+    _metadata = ListWithSize<size_t>(points.size());
     
     // Create a vector of indices to track the original positions
     vector<size_t> indices(points.size());
@@ -49,8 +51,7 @@ size_t Dim2Tree::buildTree(vector<pair<float, float>>& points,
     // Store the point and metadata
     _points[nodeIndex * 2] = points[originalIndex].first;      // Latitude
     _points[nodeIndex * 2 + 1] = points[originalIndex].second; // Longitude
-    _metadata[originalIndex * 2] = nodeIndex;                  // Original index
-    _metadata[nodeIndex * 2 + 1] = axis;                       // Split dimension
+    _metadata[originalIndex] = nodeIndex;                  // Original index
     
     // Recursively build subtrees
     size_t leftNodes = 0;
@@ -68,6 +69,10 @@ size_t Dim2Tree::buildTree(vector<pair<float, float>>& points,
     
     // Return total number of nodes in this subtree (including this node)
     return 1 + leftNodes + rightNodes;
+}
+
+size_t Dim2Tree::size() const {
+    return _points.size() / 2;
 }
 
 size_t Dim2Tree::computeLeftSubtreeSize(size_t currentNodeIndex) {
@@ -92,8 +97,8 @@ size_t Dim2Tree::approximateNearestPoint(float latitude, float longitude) {
     float bestDist = std::numeric_limits<float>::max();
     size_t bestIndex = 0;
     
-    // Start the search from the root node (index 0)
-    searchNearest(0, latitude, longitude, bestIndex, bestDist);
+    // Start the search from the root node (index 0, axis 0)
+    searchNearest(0, latitude, longitude, bestIndex, bestDist, 0);
     
     return bestIndex;
 }
@@ -106,8 +111,25 @@ pair<float, float> Dim2Tree::operator[](size_t index) const {
     return pair<float, float>(_points[index * 2], _points[index * 2 + 1]);
 }
 
+namespace utils {
+    istream &operator>>(istream &input, Dim2Tree &tree) {
+        input >> tree._points;
+        input >> tree._metadata;
+
+        return input;
+    }
+
+    ostream &operator<<(ostream &output, const Dim2Tree &tree) {
+        output << tree._points;
+        output << tree._metadata;
+
+        return output;
+    }
+}
+
 size_t Dim2Tree::searchNearest(size_t nodeIndex, float lat, float lon, 
-                              size_t& bestIndex, float& bestDist) const {
+                              size_t& bestIndex, float& bestDist,
+                              size_t splitDim) const {
 
     // If we've gone beyond the tree size, return
     if (nodeIndex >= _points.size() / 2) {
@@ -127,9 +149,6 @@ size_t Dim2Tree::searchNearest(size_t nodeIndex, float lat, float lon,
         bestIndex = nodeIndex;
     }
     
-    // Get the splitting dimension for this node
-    int splitDim = getSplitDimension(nodeIndex);
-    
     // Determine which child to search first based on the splitting dimension
     float targetValue = (splitDim == 0) ? lat : lon;
     float nodeValue = (splitDim == 0) ? nodeLat : nodeLon;
@@ -140,9 +159,11 @@ size_t Dim2Tree::searchNearest(size_t nodeIndex, float lat, float lon,
     } else {
         childToSearch = rightChild(nodeIndex);
     }
+
+    size_t newSplitDim = (splitDim + 1) % 2;
     
     // Search the first subtree
-    searchNearest(childToSearch, lat, lon, bestIndex, bestDist);
+    searchNearest(childToSearch, lat, lon, bestIndex, bestDist, newSplitDim);
     
     // Calculate the distance to the splitting plane
     float planeDist = targetValue - nodeValue;
@@ -159,11 +180,7 @@ float Dim2Tree::distanceSquared(float lat1, float lon1, float lat2, float lon2) 
 }
 
 size_t Dim2Tree::getNewIndex(size_t nodeIndex) const {
-    return _metadata[nodeIndex * 2];
-}
-
-int Dim2Tree::getSplitDimension(size_t nodeIndex) const {
-    return _metadata[nodeIndex * 2 + 1];
+    return _metadata[nodeIndex];
 }
 
 size_t Dim2Tree::leftChild(size_t nodeIndex) const {

@@ -1,8 +1,15 @@
+from pyrosm import OSM
 import osmnx as ox
 import json
 
-# Load graph for driving network in Chicago
-G = ox.graph_from_place("Chicago, Illinois, USA", network_type='drive')
+# Load graph for driving network
+# Load your .osm.pbf file
+osm = OSM("data/north-america-latest.osm.pbf")
+nodes, edges = osm.get_network(network_type="driving")
+
+# Convert to a NetworkX graph
+G = osm.to_graph(nodes, edges, graph_type="networkx")
+
 G = ox.add_edge_speeds(G)
 G = ox.add_edge_travel_times(G)
 print("Loaded graph.")

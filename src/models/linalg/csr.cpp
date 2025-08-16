@@ -4,6 +4,8 @@
 
 using linalg::CsrMatrix;
 using linalg::MutableCsrMatrix;
+using std::istream;
+using std::ostream;
 using std::pair;
 using std::vector;
 using utils::ListWithSize;
@@ -58,6 +60,28 @@ uint16_t CsrMatrix::operator()(const size_t row, const size_t col) const {
     }
 
     return (uint16_t) 0;
+}
+
+namespace linalg {
+    istream &operator>>(istream &input, CsrMatrix &matrix) {        
+        input.read(reinterpret_cast<char*>(&matrix._rows), sizeof(matrix._rows));
+        input.read(reinterpret_cast<char*>(&matrix._cols), sizeof(matrix._cols));
+
+        input >> matrix._values;
+        input >> matrix._col_indices;
+        input >> matrix._row_ptr;
+        return input;
+    }
+
+    ostream &operator<<(ostream &output, const CsrMatrix &matrix) {
+        output.write(reinterpret_cast<const char*>(&matrix._rows), sizeof(matrix._rows));
+        output.write(reinterpret_cast<const char*>(&matrix._cols), sizeof(matrix._cols));
+
+        output << matrix._values;
+        output << matrix._col_indices;
+        output << matrix._row_ptr;
+        return output;
+    }
 }
 
 pair<MemoryResult<uint16_t>, MemoryResult<size_t>> CsrMatrix::valuesInRow(size_t row) const {

@@ -2,12 +2,15 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <limits>
 #include <utility>
 #include <vector>
 
 #include "models/util/listWithSize.h"
 
+using std::istream;
+using std::ostream;
 using std::pair;
 using std::vector;
 using utils::ListWithSize;
@@ -22,11 +25,16 @@ namespace utils {
         // Find the approximate nearest point to the given coordinates
         // Returns the index of the nearest point in the vector
         size_t approximateNearestPoint(float latitude, float longitude);
+        
+        // Get the new index of a point in the input vector
+        size_t getNewIndex(size_t nodeIndex) const;
 
         pair<float, float> operator[](size_t index) const;
 
-        // Get the new index of a point in the input vector
-        size_t getNewIndex(size_t nodeIndex) const;
+        friend istream &operator>>(istream &input, Dim2Tree &tree);
+        friend ostream &operator<<(ostream &output, const Dim2Tree &tree);
+
+        size_t size() const;
 
     private:
         // Flat array representation of the KD-Tree
@@ -34,7 +42,7 @@ namespace utils {
         ListWithSize<float> _points = ListWithSize<float>(0);
         
         // Metadata for each node in the tree
-        // Format: [original_index, split_dimension, ...]
+        // Format: [original_index]
         ListWithSize<size_t> _metadata = ListWithSize<size_t>(0);
         
         // Helper method to build the KD-Tree recursively
@@ -52,7 +60,8 @@ namespace utils {
         // Helper method for nearest neighbor search
         // Returns the index of the nearest point in the original input vector
         size_t searchNearest(size_t nodeIndex, float lat, float lon, 
-                            size_t& bestIndex, float& bestDist) const;
+                            size_t& bestIndex, float& bestDist,
+                            size_t splitDim) const;
         
         // Calculate squared Euclidean distance between two points
         float distanceSquared(float lat1, float lon1, float lat2, float lon2) const;
@@ -66,4 +75,7 @@ namespace utils {
         // Get the right child index of a node
         size_t rightChild(size_t nodeIndex) const;
     };
+
+    istream &operator>>(istream &input, Dim2Tree &tree);
+    ostream &operator<<(ostream &output, const Dim2Tree &tree);
 }

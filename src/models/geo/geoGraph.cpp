@@ -1,12 +1,10 @@
 #include <fstream>
 #include <functional>
-#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <queue>
 #include <unordered_map>
 #include <unordered_set>
-#include <utility>
 
 #include "geoGraph.h"
 
@@ -20,7 +18,10 @@ using std::greater;
 using std::cout;
 using std::endl;
 using std::ifstream;
+using std::istream;
 using std::nullopt;
+using std::ofstream;
+using std::ostream;
 using std::optional;
 using std::pair;
 using std::priority_queue;
@@ -201,4 +202,20 @@ void Graph::loadGraphFromNodes(vector<GraphNode> nodes) {
     }
 
     _edges = CsrMatrix(edge_construction);
+}
+
+namespace geo {
+    istream &operator>>(istream &input, Graph &graph) {
+        input >> graph._vertices;
+        input >> graph._edges;
+
+        return input;
+    }
+
+    ostream &operator<<(ostream &output, const Graph &graph) {
+        output << graph._vertices;
+        output << graph._edges;
+
+        return output;
+    }
 }

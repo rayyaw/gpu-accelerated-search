@@ -1,10 +1,13 @@
 #pragma once
 
 #include <format>
+#include <iostream>
 #include <stdexcept>
 #include <vector>
 
 using std::format;
+using std::istream;
+using std::ostream;
 using std::out_of_range;
 using std::vector;
 
@@ -32,6 +35,13 @@ namespace utils {
         ~ListWithSize();
 
         T &operator[](size_t index) const;
+        
+        template<typename I>
+        friend istream &operator>>(istream &input, ListWithSize<I> &list);
+
+        template<typename O>
+        friend ostream &operator<<(ostream &output, const ListWithSize<O> &list);
+
         size_t size() const;
         T* data() const;
 
@@ -109,4 +119,28 @@ namespace utils {
     T* ListWithSize<T>::data() const {
         return _items;
     }
+
+    template<typename I>
+    istream &operator>>(istream& input, ListWithSize<I>& list) {
+        delete[] list._items;
+
+        input.read(reinterpret_cast<char*>(&list._num_items), sizeof(list._num_items));
+        std::cout << "reading in a list of " << list._num_items << " items" << std::endl;
+        I* items = new I[list._num_items];
+        input.read(reinterpret_cast<char*>(items), list._num_items * sizeof(I));
+        
+        list._items = items;
+
+        return input;
+    }
+
+    template<typename O>
+    ostream &operator<<(ostream& output, const ListWithSize<O>& list) {
+        std::cout << "writing out a list of " << list._num_items << " items each of size " << sizeof(O) << std::endl;
+        output.write(reinterpret_cast<const char*>(&list._num_items), sizeof(list._num_items));
+        output.write(reinterpret_cast<const char*>(list._items), list._num_items * sizeof(O));
+
+        return output;
+    }
 }
+
